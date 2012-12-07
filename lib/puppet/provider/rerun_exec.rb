@@ -4,6 +4,14 @@ require 'puppet/util/execution'
 class Puppet::Provider::RerunExec < Puppet::Provider
   include Puppet::Util::Execution
 
+  #
+  # wraps the run method with respect to a rerun <module>:<command> invocation
+  #
+  def rerun(rerun_module, rerun_command)
+     rerun_command = "rerun #{rerun_module}:#{rerun_command}"
+     run(rerun_command)
+  end
+
   def run(command, check = false)
     output = nil
     status = nil

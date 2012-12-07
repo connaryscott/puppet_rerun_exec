@@ -1,3 +1,11 @@
+#
+# forked from lib/puppet/type/exec.rb implementation to support a "rerun" <module>:<command> invocation
+# suppports new parameters:
+#    rerun_module
+#    rerun_command
+#    rerun_command_options (not implemented yet, still under development and testing)
+#    executes the rerun() provider method instead of run():
+#
 module Puppet
   newtype(:rerun_exec) do
     include Puppet::Util::Execution
@@ -92,7 +100,8 @@ module Puppet
           tries.times do |try|
             # Only add debug messages for tries > 1 to reduce log spam.
             debug("Exec try #{try+1}/#{tries}") if tries > 1
-            @output, @status = provider.run(self.resource[:command])
+            # modified to execute rerun() instead of run()
+            @output, @status = provider.rerun(self.resource[:rerun_module], self.resource[:rerun_command])
             break if self.should.include?(@status.exitstatus.to_s)
             if try_sleep > 0 and tries > 1
               debug("Sleeping for #{try_sleep} seconds between tries")
@@ -137,6 +146,27 @@ module Puppet
         normal log level (usually `notice`), but if the command fails
         (meaning its return code does not match the specified code) then
         any output is logged at the `err` log level."
+    end
+
+    #
+    # support for the new rerun_module parameter
+    #
+    newparam(:rerun_module) do
+      desc "Rerun module to execute"
+    end
+
+    #
+    # support for the new rerun_command parameter
+    #
+    newparam(:rerun_command) do
+      desc "Rerun command to execute"
+    end
+
+    #
+    # support for the new rerun_command_options parameter
+    #
+    newparam(:rerun_command_options) do
+      desc "Options to provide to the Rerun command" 
     end
 
     newparam(:path) do
